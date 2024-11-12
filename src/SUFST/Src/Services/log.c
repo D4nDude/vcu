@@ -23,6 +23,9 @@ static void log_thread_entry(ULONG thread_input);
 // log level names
 static const char* log_level_names[] = {"DEBUG", "INFO", "WARN", "ERROR"};
 
+// Global Log Context
+static log_context_t* global_log_context;
+
 /**
  * @brief initialises the logging service
  *
@@ -95,11 +98,12 @@ status_t log_init(log_context_t* log_ptr,
     return status;
 }
 
-status_t log_printf(log_context_t* log_ptr,
-                    const config_log_level_t level,
+status_t log_printf(const config_log_level_t level,
                     const char* format,
                     ...)
 {
+    log_context_t* log_ptr = global_log_context;
+    
     // check if the message should be logged
     if (level >= log_ptr->config_ptr->min_level)
     {
@@ -130,6 +134,7 @@ status_t log_printf(log_context_t* log_ptr,
 void log_thread_entry(ULONG thread_input)
 {
     log_context_t* log_ptr = (log_context_t*) thread_input;
+    global_log_context = log_ptr;
     log_msg_t msg;
     UINT tx_status;
 
